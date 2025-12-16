@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+<robot name="my_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="controllers_yaml" default="" />
+
+  <!-- ================= -->
+  <!-- Parameters -->
+  <!-- ================= -->
+  <xacro:property name="base_x" value="0.3"/>
+  <xacro:property name="base_y" value="0.2"/>
+  <xacro:property name="base_z" value="0.1"/>
+
+  <!-- ================= -->
+  <!-- Inertia macro -->
+  <!-- ================= -->
+  <xacro:macro name="box_inertia" params="mass x y z">
+    <inertial>
+      <origin xyz="0 0 0"/>
+      <mass value="${mass}"/>
+      <inertia
+        ixx="${mass*(y*y+z*z)/12}"
+        iyy="${mass*(x*x+z*z)/12}"
+        izz="${mass*(x*x+y*y)/12}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ================= -->
+  <!-- Base -->
+  <!-- ================= -->
+  <link name="base_link">
+    <xacro:box_inertia mass="5.0" x="${base_x}" y="${base_y}" z="${base_z}"/>
+
+    <visual>
+      <geometry>
+        <box size="${base_x} ${base_y} ${base_z}"/>
+      </geometry>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="${base_x} ${base_y} ${base_z}"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Red</material>
+  </gazebo>
+
+  <!-- ================= -->
+  <!-- Support foot -->
+  <!-- ================= -->
+
+  
+  <!-- ================= -->
+  <!-- Upper body -->
+  <!-- ================= -->
+  <link name="link_1">
+    <xacro:box_inertia mass="1.0" x="0.2" y="0.05" z="0.05"/>
+
+    <visual>
+      <geometry>
+        <box size="0.2 0.05 0.05"/>
+      </geometry>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.2 0.05 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="link_1">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <joint name="joint_1" type="revolute">
+    <parent link="base_link"/>
+    <child link="link_1"/>
+    <origin xyz="0 0 0.1"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-1.57" upper="1.57" effort="10" velocity="3"/>
+  </joint>
+
+  <!-- ================= -->
+<!-- Leg macro -->
+<!-- ================= -->
+<xacro:macro name="biped_leg" params="prefix parent xyz">
+
+  <!-- THIGH -->
+  <link name="${prefix}_thigh">
+    <xacro:box_inertia mass="1.5" x="0.05" y="0.05" z="0.25"/>
+    <visual>
+      <geometry><box size="0.05 0.05 0.25"/></geometry>
+    </visual>
+    <collision>
+      <geometry><box size="0.05 0.05 0.25"/></geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="${prefix}_thigh">
+    <material>Gazebo/Green</material>
+  </gazebo>
+
+  <joint name="${prefix}_hip_joint" type="revolute">
+    <parent link="${parent}"/>
+    <child link="${prefix}_thigh"/>
+    <origin xyz="${xyz}" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.0" upper="1.0" effort="20" velocity="4"/>
+    <dynamics damping="8.0" friction="3.0"/>
+  </joint>
+
+  <!-- SHIN -->
+  <link name="${prefix}_shin">
+    <xacro:box_inertia mass="1.0" x="0.04" y="0.04" z="0.25"/>
+    <visual>
+      <geometry><box size="0.04 0.04 0.25"/></geometry>
+    </visual>
+    <collision>
+      <geometry><box size="0.04 0.04 0.25"/></geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="${prefix}_shin">
+    <material>Gazebo/Blue</material>
+  </gazebo>
+
+  <joint name="${prefix}_knee_joint" type="revolute">
+    <parent link="${prefix}_thigh"/>
+    <child link="${prefix}_shin"/>
+    <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0.0" upper="2.2" effort="20" velocity="4"/>
+    <dynamics damping="8.0" friction="3.0"/>
+  </joint>
+
+  <!-- FOOT -->
+  <link name="${prefix}_foot">
+    <xacro:box_inertia mass="0.8" x="0.08" y="0.12" z="0.04"/>
+
+    <!-- Put the foot slightly below the ankle so it actually contacts the ground -->
+    <visual>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+      <geometry><box size="0.08 0.12 0.04"/></geometry>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+      <geometry><box size="0.08 0.12 0.04"/></geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="${prefix}_foot">
+    <material>Gazebo/Gray</material>
+    <mu1>2.0</mu1>
+    <mu2>2.0</mu2>
+  </gazebo>
+
+  <joint name="${prefix}_ankle_joint" type="revolute">
+    <parent link="${prefix}_shin"/>
+    <child link="${prefix}_foot"/>
+
+    <!-- ankle at bottom of shin -->
+    <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.6" upper="0.6" effort="15" velocity="4"/>
+    <dynamics damping="8.0" friction="3.0"/>
+  </joint>
+
+</xacro:macro>
+
+<!-- ================= -->
+<!-- Legs -->
+<!-- ================= -->
+<!-- Move legs inward and slightly forward so the robot doesn't tip instantly -->
+<xacro:biped_leg prefix="left"  parent="base_link" xyz="0.05  0.06 -0.05"/>
+<xacro:biped_leg prefix="right" parent="base_link" xyz="0.05 -0.06 -0.05"/>
+
+    <!-- =============================== -->
+  <!-- ROS 2 CONTROL -->
+  <!-- =============================== -->
+  <ros2_control name="my_biped" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <joint name="left_hip">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="left_knee">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="left_ankle">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="right_hip">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="right_knee">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="right_ankle">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+
+
+  <!-- ================= -->
+  <!-- Gazebo Classic plugin -->
+  <!-- ================= -->
+  <gazebo>
+  <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+    <robot_param>robot_description</robot_param>
+    <parameters>$(find my_robot_description)/config/controllers.yaml</parameters>
+  </plugin>
+</gazebo>
+
+
+</robot>

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd"
+            schematypens="http://www.w3.org/2001/XMLSchema"?>
+
+<package format="3">
+  <name>my_robot_description</name>
+  <version>0.0.0</version>
+  <description>Robot description and standalone ros2_control setup</description>
+
+  <maintainer email="parispoll@todo.todo">parispoll</maintainer>
+  <license>TODO</license>
+
+  <!-- Build system -->
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- Core description -->
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <!-- ros2_control (standalone, video approach) -->
+  <exec_depend>ros2_control</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>forward_command_controller</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>mock_components</exec_depend>
+
+  <!-- Gazebo (simulation only, no control plugin) -->
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+
+  <!-- Testing -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,9 @@
+forward_position_controller:
+  ros__parameters:
+    joints:
+      - left_hip
+      - left_knee
+      - left_ankle
+      - right_hip
+      - right_knee
+      - right_ankle
