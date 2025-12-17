@@ -4,141 +4,199 @@
 
 <xacro:arg name="controllers_yaml" default=""/>
 
+<material name="red">
+  <color rgba="0.8 0.1 0.1 1"/>
+</material>
+
+<material name="green">
+  <color rgba="0.2 0.8 0.2 1"/>
+</material>
+
+<material name="blue">
+  <color rgba="0.2 0.2 0.8 1"/>
+</material>
+
+<material name="gray">
+  <color rgba="0.6 0.6 0.6 1"/>
+</material>
 
 
-  <!-- ================= -->
-  <!-- Inertia macro -->
-  <!-- ================= -->
-  <xacro:macro name="box_inertia" params="m x y z">
-    <inertial>
-      <mass value="${m}"/>
-      <inertia
-        ixx="${m*(y*y+z*z)/12}"
-        iyy="${m*(x*x+z*z)/12}"
-        izz="${m*(x*x+y*y)/12}"
-        ixy="0" ixz="0" iyz="0"/>
-    </inertial>
-  </xacro:macro>
+<!-- ================= -->
+<!-- Inertia macro -->
+<!-- ================= -->
+<xacro:macro name="box_inertia" params="m x y z">
+  <inertial>
+    <mass value="${m}"/>
+    <inertia
+      ixx="${m*(y*y+z*z)/12}"
+      iyy="${m*(x*x+z*z)/12}"
+      izz="${m*(x*x+y*y)/12}"
+      ixy="0" ixz="0" iyz="0"/>
+  </inertial>
+</xacro:macro>
 
-  <!-- ================= -->
-  <!-- BASE (ROOT) -->
-  <!-- ================= -->
-  <link name="base_link">
-    <xacro:box_inertia m="6.0" x="0.3" y="0.2" z="0.1"/>
+<!-- ================= -->
+<!-- BASE (ROOT) -->
+<!-- ================= -->
+<link name="base_link">
+
+  <xacro:box_inertia m="6.0" x="0.3" y="0.2" z="0.1"/>
+
+  <visual>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.3 0.2 0.1"/>
+    </geometry>
+    <material name="red"/>
+  </visual>
+
+  <collision>
+    <origin xyz="0 0 0.05" rpy="0 0 0"/>
+    <geometry>
+      <box size="0.3 0.2 0.1"/>
+    </geometry>
+  </collision>
+
+</link>
+
+<gazebo reference="base_link">
+  <material>Gazebo/Red</material>
+</gazebo>
+
+
+<!-- ================= -->
+<!-- LEG MACRO -->
+<!-- ================= -->
+<xacro:macro name="leg" params="side y">
+
+  <!-- THIGH -->
+  <link name="${side}_thigh">
+
+    <xacro:box_inertia m="1.5" x="0.05" y="0.05" z="0.25"/>
 
     <visual>
-      <geometry><box size="0.3 0.2 0.1"/></geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 0.25"/>
+      </geometry>
+      <material name="green"/>
     </visual>
 
     <collision>
-      <geometry><box size="0.3 0.2 0.1"/></geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.05 0.25"/>
+      </geometry>
     </collision>
+
   </link>
 
-  <gazebo reference="base_link">
-    <material>Gazebo/Red</material>
-  </gazebo>
+  <joint name="${side}_hip" type="revolute">
+    <parent link="base_link"/>
+    <child link="${side}_thigh"/>
+    <origin xyz="0.05 ${y} -0.05"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-1.0" upper="1.0" effort="40" velocity="4"/>
+    <dynamics damping="10" friction="3"/>
+  </joint>
 
-   <!-- ================= -->
-  <!-- LEG MACRO -->
-  <!-- ================= -->
-  <xacro:macro name="leg" params="side y">
+  <!-- SHIN -->
+  <link name="${side}_shin">
 
-    <!-- THIGH -->
-    <link name="${side}_thigh">
-      <xacro:box_inertia m="1.5" x="0.05" y="0.05" z="0.25"/>
-      <visual>
-        <geometry>
-          <box size="0.05 0.05 0.25"/>
-        </geometry>
-      </visual>
-      <collision>
-        <geometry>
-          <box size="0.05 0.05 0.25"/>
-        </geometry>
-      </collision>
-    </link>
+    <xacro:box_inertia m="1.0" x="0.04" y="0.04" z="0.25"/>
 
-    <gazebo reference="${side}_thigh">
-      <material>Gazebo/Green</material>
-    </gazebo>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.25"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
 
-    <joint name="${side}_hip" type="revolute">
-      <parent link="base_link"/>
-      <child link="${side}_thigh"/>
-      <origin xyz="0.05 ${y} -0.05"/>
-      <axis xyz="1 0 0"/>
-      <limit lower="-1.0" upper="1.0" effort="40" velocity="4"/>
-      <dynamics damping="10" friction="3"/>
-    </joint>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.04 0.25"/>
+      </geometry>
+    </collision>
 
-    <!-- SHIN -->
-    <link name="${side}_shin">
-      <xacro:box_inertia m="1.0" x="0.04" y="0.04" z="0.25"/>
-      <visual>
-        <geometry>
-          <box size="0.04 0.04 0.25"/>
-        </geometry>
-      </visual>
-      <collision>
-        <geometry>
-          <box size="0.04 0.04 0.25"/>
-        </geometry>
-      </collision>
-    </link>
+  </link>
 
-    <gazebo reference="${side}_shin">
-      <material>Gazebo/Blue</material>
-    </gazebo>
+  <joint name="${side}_knee" type="revolute">
+    <parent link="${side}_thigh"/>
+    <child link="${side}_shin"/>
+    <origin xyz="0 0 -0.25"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="0.0" upper="2.2" effort="40" velocity="4"/>
+    <dynamics damping="10" friction="3"/>
+  </joint>
 
-    <joint name="${side}_knee" type="revolute">
-      <parent link="${side}_thigh"/>
-      <child link="${side}_shin"/>
-      <origin xyz="0 0 -0.25"/>
-      <axis xyz="1 0 0"/>
-      <limit lower="0.0" upper="2.2" effort="40" velocity="4"/>
-      <dynamics damping="10" friction="3"/>
-    </joint>
+  <gazebo reference="left_thigh">
+  <material>Gazebo/Green</material>
+</gazebo>
 
-    <!-- FOOT -->
-    <link name="${side}_foot">
-      <xacro:box_inertia m="0.8" x="0.08" y="0.12" z="0.04"/>
-      <visual>
-        <origin xyz="0 0 -0.02"/>
-        <geometry>
-          <box size="0.08 0.12 0.04"/>
-        </geometry>
-      </visual>
-      <collision>
-        <origin xyz="0 0 -0.02"/>
-        <geometry>
-          <box size="0.08 0.12 0.04"/>
-        </geometry>
-      </collision>
-    </link>
+<gazebo reference="right_thigh">
+  <material>Gazebo/Green</material>
+</gazebo>
 
-    <gazebo reference="${side}_foot">
-      <material>Gazebo/Gray</material>
-      <mu1>2.0</mu1>
-      <mu2>2.0</mu2>
-    </gazebo>
 
-    <joint name="${side}_ankle" type="revolute">
-      <parent link="${side}_shin"/>
-      <child link="${side}_foot"/>
-      <origin xyz="0 0 -0.25"/>
-      <axis xyz="1 0 0"/>
-      <limit lower="-0.6" upper="0.6" effort="30" velocity="4"/>
-      <dynamics damping="10" friction="3"/>
-    </joint>
+  <!-- FOOT -->
+  <link name="${side}_foot">
 
-  </xacro:macro>
+    <xacro:box_inertia m="0.8" x="0.08" y="0.12" z="0.04"/>
 
-  <!-- ================= -->
-  <!-- LEGS -->
-  <!-- ================= -->
-  <xacro:leg side="left"  y="0.06"/>
-  <xacro:leg side="right" y="-0.06"/>
+    <visual>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.12 0.04"/>
+      </geometry>
+      <material name="gray"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.08 0.12 0.04"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <joint name="${side}_ankle" type="revolute">
+    <parent link="${side}_shin"/>
+    <child link="${side}_foot"/>
+    <origin xyz="0 0 -0.25"/>
+    <axis xyz="1 0 0"/>
+    <limit lower="-0.6" upper="0.6" effort="30" velocity="4"/>
+    <dynamics damping="10" friction="3"/>
+  </joint>
+
+  <gazebo reference="left_shin">
+  <material>Gazebo/Blue</material>
+</gazebo>
+
+<gazebo reference="right_shin">
+  <material>Gazebo/Blue</material>
+</gazebo>
+
+<gazebo reference="left_foot">
+  <material>Gazebo/Grey</material>
+</gazebo>
+
+<gazebo reference="right_foot">
+  <material>Gazebo/Grey</material>
+</gazebo>
+
+
+
+</xacro:macro>
+
+<!-- ================= -->
+<!-- LEGS -->
+<!-- ================= -->
+<xacro:leg side="left"  y="0.06"/>
+<xacro:leg side="right" y="-0.06"/>
+
 
   <!-- =============================== -->
   <!-- ROS 2 CONTROL SYSTEM -->
@@ -187,9 +245,6 @@
   </ros2_control>
 
 
-  <!-- =============================== -->
-  <!-- Gazebo Classic ros2_control -->
-  <!-- =============================== -->
     <!-- =============================== -->
   <!-- Gazebo Classic ros2_control -->
   <!-- =============================== -->
