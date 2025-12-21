@@ -19,11 +19,17 @@ def generate_launch_description():
         value_type=str
     )
 
+    # ------------------------
+    # Gazebo
+    # ------------------------
     gazebo = ExecuteProcess(
-        cmd=['gazebo', '--verbose', world_path, '-s', 'libgazebo_ros_factory.so'],
+        cmd=['gazebo', '--verbose','--pause', world_path, '-s', 'libgazebo_ros_factory.so'],
         output='screen'
     )
 
+    # ------------------------
+    # Robot State Publisher
+    # ------------------------
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -31,37 +37,51 @@ def generate_launch_description():
         output='screen'
     )
 
+    # ------------------------
+    # Spawn robot in Gazebo
+    # ------------------------
     spawn_robot = Node(
-    package='gazebo_ros',
-    executable='spawn_entity.py',
-    arguments=[
-        '-topic', 'robot_description',
-        '-entity', 'my_biped',
-        '-x', '0.0',
-        '-y', '0.0',
-        '-z', '0.7',
-        '-R', '0.0',
-        '-P', '0.0',
-        '-Y', '0.0'
-    ],
-    output='screen'
-)
+        package='gazebo_ros',
+        executable='spawn_entity.py',
+        arguments=[
+            '-topic', 'robot_description',
+            '-entity', 'my_biped',
+            '-x', '0.0',
+            '-y', '0.0',
+            '-z', '0.7',   # OK for now since physics is disabled
+            '-R', '0.0',
+            '-P', '0.0',
+            '-Y', '0.0'
+        ],
+        output='screen'
+    )
 
-
+    # ------------------------
+    # Controllers
+    # ------------------------
     joint_state_broadcaster_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['joint_state_broadcaster', '--controller-manager', '/controller_manager'],
+        arguments=[
+            'joint_state_broadcaster',
+            '--controller-manager', '/controller_manager'
+        ],
         output='screen'
     )
 
-    forward_position_controller_spawner = Node(
+    joint_trajectory_controller_spawner = Node(
         package='controller_manager',
         executable='spawner',
-        arguments=['forward_position_controller', '--controller-manager', '/controller_manager'],
+        arguments=[
+            'joint_trajectory_controller',
+            '--controller-manager', '/controller_manager'
+        ],
         output='screen'
     )
 
+    # ------------------------
+    # Launch sequence
+    # ------------------------
     return LaunchDescription([
         gazebo,
         robot_state_publisher,
@@ -70,7 +90,7 @@ def generate_launch_description():
             period=5.0,
             actions=[
                 joint_state_broadcaster_spawner,
-                forward_position_controller_spawner
+                joint_trajectory_controller_spawner
             ]
         )
     ])
