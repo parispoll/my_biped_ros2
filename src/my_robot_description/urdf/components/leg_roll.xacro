@@ -1,0 +1,129 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- 80 g, 5 x 5 x 4 cm box: inertia is about its centered COM. -->
+  <xacro:include filename="roll_actuators.xacro"/>
+  <xacro:macro name="roll_carrier" params="name index">
+    <link name="${name}">
+      <xacro:roll_inertial mass="${0.08}" z="${0.0}" index="${index}"
+        ixx="${0.08*(0.05**2+0.04**2)/12}" iyy="${0.08*(0.05**2+0.04**2)/12}" izz="${0.08*(0.05**2+0.05**2)/12}"/>
+      <visual><geometry><box size="0.05 0.05 0.04"/></geometry>
+        <material name="gray"/></visual>
+    </link>
+  </xacro:macro>
+  <xacro:macro name="leg5" params="side ysign">
+    <!-- Internal joint carriers have finite mass/inertia, with no collision
+         geometry. Dimensions/masses are provisional modeling assumptions. -->
+    <xacro:roll_carrier name="${side}_hip_roll_carrier" index="${0}"/>
+    <joint name="${side}_hip_roll" type="revolute">
+      <parent link="base_link"/><child link="${side}_hip_roll_carrier"/>
+      <origin xyz="0 ${ysign*hip_y} 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="-0.35" upper="0.35" effort="${roll_actuator['caps_nm'][0]}" velocity="${roll_actuator['speed_rad_s'][0] if roll_actuator_name != 'legacy' else 2}"/>
+      <dynamics damping="0.2" friction="0.0"/>
+    </joint>
+    <xacro:roll_carrier name="${side}_ankle_pitch_carrier" index="${3}"/>
+    <joint name="${side}_ankle_roll" type="revolute">
+      <parent link="${side}_ankle_pitch_carrier"/><child link="${side}_foot"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="1 0 0"/>
+      <limit lower="-0.35" upper="0.35" effort="${roll_actuator['caps_nm'][4]}" velocity="${roll_actuator['speed_rad_s'][4] if roll_actuator_name != 'legacy' else 2}"/>
+      <dynamics damping="0.2" friction="0.0"/>
+    </joint>
+
+
+    <!-- THIGH -->
+    <link name="${side}_thigh">
+      <xacro:roll_inertial mass="${m_thigh}" z="${-thigh_len/2}" index="${1}" ixx="${(m_thigh*(3*leg_rad*leg_rad + thigh_len*thigh_len))/12}" iyy="${(m_thigh*(3*leg_rad*leg_rad + thigh_len*thigh_len))/12}" izz="${0.5*m_thigh*leg_rad*leg_rad}"/>
+
+      <visual>
+        <origin xyz="0 0 ${-thigh_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad}" length="${thigh_len}"/></geometry>
+        <material name="green"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 ${-thigh_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad}" length="${thigh_len}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${side}_hip_pitch" type="revolute">
+      <parent link="${side}_hip_roll_carrier"/>
+      <child link="${side}_thigh"/>
+      <!-- Co-located pitch axis follows the new hip-roll axis. -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-1.2" upper="1.2" effort="${roll_actuator['caps_nm'][1] if roll_actuator_name != 'legacy' else 80}" velocity="${roll_actuator['speed_rad_s'][1] if roll_actuator_name != 'legacy' else 6}"/>
+      <dynamics damping="${hip_damp}" friction="${joint_fric}"/>
+    </joint>
+
+    <!-- SHIN -->
+    <link name="${side}_shin">
+      <xacro:roll_inertial mass="${m_shin}" z="${-shin_len/2}" index="${2}" ixx="${(m_shin*(3*leg_rad*leg_rad + shin_len*shin_len))/12}" iyy="${(m_shin*(3*leg_rad*leg_rad + shin_len*shin_len))/12}" izz="${0.5*m_shin*leg_rad*leg_rad}"/>
+
+      <visual>
+        <origin xyz="0 0 ${-shin_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad*0.95}" length="${shin_len}"/></geometry>
+        <material name="blue"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 ${-shin_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad*0.95}" length="${shin_len}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${side}_knee_pitch" type="revolute">
+      <parent link="${side}_thigh"/>
+      <child link="${side}_shin"/>
+      <origin xyz="0 0 ${-thigh_len}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="0.0" upper="2.4" effort="${roll_actuator['caps_nm'][2] if roll_actuator_name != 'legacy' else 80}" velocity="${roll_actuator['speed_rad_s'][2] if roll_actuator_name != 'legacy' else 6}"/>
+      <dynamics damping="${knee_damp}" friction="${joint_fric}"/>
+    </joint>
+
+    <!-- FOOT -->
+    <link name="${side}_foot">
+      <xacro:roll_inertial mass="${m_foot}" z="${-foot_z/2}" index="${4}" ixx="${m_foot*(foot_y*foot_y + foot_z*foot_z)/12}" iyy="${m_foot*(foot_x*foot_x + foot_z*foot_z)/12}" izz="${m_foot*(foot_x*foot_x + foot_y*foot_y)/12}"/>
+
+      <visual>
+        <origin xyz="0 0 ${-foot_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${foot_x} ${foot_y} ${foot_z}"/></geometry>
+        <material name="gray"/>
+      </visual>
+
+      <!-- The URDF converter appends _collision, yielding e.g. left_foot_collision. -->
+      <collision name="${side}_foot">
+        <origin xyz="0 0 ${-foot_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${foot_x} ${foot_y} ${foot_z}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${side}_ankle_pitch" type="revolute">
+      <parent link="${side}_shin"/>
+      <child link="${side}_ankle_pitch_carrier"/>
+      <!-- ankle directly under shin -->
+      <origin xyz="0 0 ${-shin_len}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-0.8" upper="0.8" effort="${roll_actuator['caps_nm'][3] if roll_actuator_name != 'legacy' else 60}" velocity="${roll_actuator['speed_rad_s'][3] if roll_actuator_name != 'legacy' else 4}"/>
+      <dynamics damping="${ankle_damp}" friction="${joint_fric}"/>
+    </joint>
+
+    <!-- Gazebo appearance -->
+    <gazebo reference="${side}_thigh"><material>Gazebo/Green</material></gazebo>
+    <gazebo reference="${side}_shin"><material>Gazebo/Blue</material></gazebo>
+    <gazebo reference="${side}_foot"><material>Gazebo/Grey</material></gazebo>
+
+    <!-- Legacy contact settings: backend support must be verified separately. -->
+    <gazebo reference="${side}_foot">
+      <mu1>${mu}</mu1>
+      <mu2>${mu}</mu2>
+      <kp>${kp}</kp>
+      <kd>${kd}</kd>
+      <minDepth>0.001</minDepth>
+      <maxVel>0.05</maxVel>
+      <selfCollide>false</selfCollide>
+    </gazebo>
+
+  </xacro:macro>
+</robot>

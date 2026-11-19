@@ -1,0 +1,10 @@
+# Legacy pitch-balance gains and bounded ankle correction; not the ten-joint walking planner.
+
+standing_effort:
+  ros__parameters:
+    # Optional body-level correction; enabling is a separate launch argument.
+    balance_kp: 20.0          # TOTAL N m/rad, split between ankles
+    balance_kd: 4.0           # TOTAL N m s/rad
+    balance_limit: 0.5        # N m per ankle, before the total motor clamp
+    balance_target: 0.0       # world pitch, rad
+    balance_ramp_seconds: 1.0 # simulated seconds, after posture readiness

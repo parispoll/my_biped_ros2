@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!-- Entry point: compose the model from components with one responsibility each. -->
+<robot name="my_biped" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="controllers_yaml"
+             default="$(find my_robot_description)/config/effort_standing.yaml"/>
+  <!-- Defaults preserve the exact straight model when expanded on its own. -->
+  <xacro:arg name="initial_hip" default="0.0"/>
+  <xacro:arg name="initial_knee" default="0.0"/>
+  <xacro:arg name="initial_ankle" default="0.0"/>
+  <xacro:arg name="joint_friction" default="0.2"/>
+  <xacro:arg name="damping_model" default="implicit"/>
+  <xacro:include filename="components/properties.xacro"/>
+  <!-- Diagnostic override: default preserves the original model. -->
+  <xacro:property name="joint_fric" value="$(arg joint_friction)"/>
+  <xacro:if value="${'$(arg damping_model)' == 'explicit'}">
+    <xacro:include filename="components/explicit_damping.xacro"/>
+  </xacro:if>
+  <xacro:include filename="components/materials.xacro"/>
+  <xacro:include filename="components/base.xacro"/>
+  <xacro:include filename="components/leg.xacro"/>
+  <xacro:leg3 side="left" ysign="1"/>
+  <xacro:leg3 side="right" ysign="-1"/>
+  <xacro:include filename="components/control_effort.xacro"/>
+  <xacro:include filename="components/gazebo.xacro"/>
+  <xacro:include filename="components/imu.xacro"/>
+  <xacro:include filename="components/foot_contacts.xacro"/>
+</robot>

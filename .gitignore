@@ -17,3 +17,13 @@ __pycache__/
 
 # Gazebo
 *.db
+
+# Local data, runtimes, generated output, and personal notes
+.runtime/
+.venv*/
+evidence/
+output/
+tmp/
+learning-vault/
+__pycache__/
+*.pyc

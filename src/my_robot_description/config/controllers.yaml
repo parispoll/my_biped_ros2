@@ -1,20 +1,17 @@
+# Historical six-joint position-control configuration; retained for baseline modes.
+
+# Controller registration: instance names and implementation plugins.
 controller_manager:
   ros__parameters:
-    update_rate: 100
-
+    update_rate: 250  # Hz; requested control period is 4 milliseconds.
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
+    joint_trajectory_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
 
-    forward_position_controller:
-      type: forward_command_controller/ForwardCommandController
-
-forward_position_controller:
+# Trajectory behaviour: must match interfaces in urdf/components/control.xacro.
+joint_trajectory_controller:
   ros__parameters:
-    joints:
-      - left_hip
-      - left_knee
-      - left_ankle
-      - right_hip
-      - right_knee
-      - right_ankle
-    interface_name: position
+    joints: [left_hip, left_knee, left_ankle, right_hip, right_knee, right_ankle]
+    command_interfaces: [position]  # Desired angles in radians, not motor torques.
+    state_interfaces: [position, velocity]

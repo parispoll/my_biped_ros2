@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="roll_actuator_name" value="$(optenv BIPED_ACTUATOR_PROFILE legacy)"/>
+  <xacro:property name="roll_actuator_data" lazy_eval="false" value="${xacro.load_yaml('../../config/roll_actuators.yaml')}"/>
+  <xacro:property name="roll_actuator" value="${roll_actuator_data['profiles'][roll_actuator_name]}"/>
+  <!-- Composite original link + output-joint-centered actuator case.
+       Case inertia is a uniform-box approximation, not measured rotor inertia. -->
+  <xacro:macro name="roll_inertial" params="mass z ixx iyy izz index">
+    <xacro:property name="motor_mass" value="${roll_actuator['added_mass_kg'][index]}"/>
+    <xacro:property name="case_length" value="${roll_actuator['case_length_m'][index]}"/>
+    <xacro:property name="total_mass" value="${mass+motor_mass}"/>
+    <xacro:property name="center_z" value="${mass*z/total_mass}"/>
+    <inertial>
+      <origin xyz="0 0 ${center_z}" rpy="0 0 0"/>
+      <mass value="${total_mass}"/>
+      <inertia ixx="${ixx + mass*(z-center_z)**2 + motor_mass*center_z**2 + motor_mass*(case_length**2+0.054**2)/12}"
+               iyy="${iyy + mass*(z-center_z)**2 + motor_mass*center_z**2 + motor_mass*(0.054**2+0.054**2)/12}"
+               izz="${izz + motor_mass*(0.054**2+case_length**2)/12}"
+               ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </xacro:macro>
+</robot>

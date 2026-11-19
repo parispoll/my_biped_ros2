@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Experimental limits, not manufacturer motor specifications. -->
+  <xacro:macro name="effort_joint" params="name initial limit">
+    <joint name="${name}">
+      <command_interface name="effort">
+        <param name="min">${-limit}</param><param name="max">${limit}</param>
+      </command_interface>
+      <state_interface name="position"><param name="initial_value">${initial}</param></state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+  <ros2_control name="my_biped" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <xacro:effort_joint name="left_hip" initial="$(arg initial_hip)" limit="6.0"/>
+    <xacro:effort_joint name="left_knee" initial="$(arg initial_knee)" limit="10.0"/>
+    <xacro:effort_joint name="left_ankle" initial="$(arg initial_ankle)" limit="6.0"/>
+    <xacro:effort_joint name="right_hip" initial="$(arg initial_hip)" limit="6.0"/>
+    <xacro:effort_joint name="right_knee" initial="$(arg initial_knee)" limit="10.0"/>
+    <xacro:effort_joint name="right_ankle" initial="$(arg initial_ankle)" limit="6.0"/>
+  </ros2_control>
+</robot>

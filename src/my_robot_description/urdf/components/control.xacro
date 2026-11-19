@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Declare one joint interface consistently; initial values are angles, not offsets. -->
+  <xacro:macro name="controlled_joint" params="name initial">
+    <joint name="${name}">
+      <command_interface name="position"/>
+      <state_interface name="position">
+        <param name="initial_value">${initial}</param>
+      </state_interface>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+  <ros2_control name="my_biped" type="system">
+    <hardware>
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </hardware>
+    <xacro:controlled_joint name="left_hip" initial="$(arg initial_hip)"/>
+    <xacro:controlled_joint name="left_knee" initial="$(arg initial_knee)"/>
+    <xacro:controlled_joint name="left_ankle" initial="$(arg initial_ankle)"/>
+    <xacro:controlled_joint name="right_hip" initial="$(arg initial_hip)"/>
+    <xacro:controlled_joint name="right_knee" initial="$(arg initial_knee)"/>
+    <xacro:controlled_joint name="right_ankle" initial="$(arg initial_ankle)"/>
+  </ros2_control>
+</robot>

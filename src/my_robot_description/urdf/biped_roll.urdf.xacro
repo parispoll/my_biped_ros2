@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- Separate ten-joint geometry model. No controller plugin is attached yet. -->
+<robot name="biped_roll" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:include filename="components/properties.xacro"/>
+  <xacro:include filename="components/materials.xacro"/>
+  <xacro:include filename="components/base.xacro"/>
+  <xacro:include filename="components/leg_roll.xacro"/>
+  <xacro:leg5 side="left" ysign="1"/>
+  <xacro:leg5 side="right" ysign="-1"/>
+</robot>

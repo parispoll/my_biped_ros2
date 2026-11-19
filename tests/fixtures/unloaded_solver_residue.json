@@ -1,0 +1,91 @@
+{
+  "side": "right",
+  "sim_time": 180.661,
+  "message": {
+    "header": {
+      "stamp": {
+        "sec": 180,
+        "nanosec": 661000000
+      },
+      "frame_id": ""
+    },
+    "contacts": [
+      {
+        "collision1": {
+          "id": 41,
+          "name": "my_biped::right_foot::right_foot_collision",
+          "type": 0
+        },
+        "collision2": {
+          "id": 7,
+          "name": "ground_plane::ground::collision",
+          "type": 0
+        },
+        "positions": [
+          {
+            "x": 0.11483284139728393,
+            "y": -0.14498337269547215,
+            "z": -2.019305611611344e-09
+          }
+        ],
+        "normals": [
+          {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 1.0
+          }
+        ],
+        "depths": [
+          2.019305611611344e-09
+        ],
+        "wrenches": [
+          {
+            "header": {
+              "stamp": {
+                "sec": 0,
+                "nanosec": 0
+              },
+              "frame_id": ""
+            },
+            "body_1_name": {
+              "data": ""
+            },
+            "body_1_id": {
+              "data": 0
+            },
+            "body_2_name": {
+              "data": ""
+            },
+            "body_2_id": {
+              "data": 0
+            },
+            "body_1_wrench": {
+              "force": {
+                "x": 4.110239915066511e-08,
+                "y": -4.1102399150665116e-08,
+                "z": 0.0
+              },
+              "torque": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              }
+            },
+            "body_2_wrench": {
+              "force": {
+                "x": -4.110239915066511e-08,
+                "y": 4.1102399150665116e-08,
+                "z": -0.0
+              },
+              "torque": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

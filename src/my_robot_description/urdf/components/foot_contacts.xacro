@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- Observe existing foot collisions; no extra mass, geometry or actuator. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="foot_contact_sensor" params="side">
+    <gazebo reference="${side}_foot">
+      <sensor name="${side}_foot_contact" type="contact">
+        <always_on>true</always_on>
+        <contact>
+          <collision>${side}_foot_collision</collision>
+          <!-- Harmonic's Contact system reads the topic from this contact block. -->
+          <topic>/biped/${side}_foot/contacts</topic>
+        </contact>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+  <xacro:foot_contact_sensor side="left"/>
+  <xacro:foot_contact_sensor side="right"/>
+</robot>

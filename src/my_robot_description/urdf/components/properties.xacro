@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="hip_y" value="0.085"/>
+
+  <!-- link sizes -->
+  <xacro:property name="base_x" value="0.18"/>
+  <xacro:property name="base_y" value="0.22"/>
+  <xacro:property name="base_z" value="0.16"/>
+
+  <xacro:property name="thigh_len" value="0.26"/>
+  <xacro:property name="shin_len"  value="0.26"/>
+
+  <xacro:property name="leg_rad" value="0.035"/>
+
+  <!-- Foot dimensions in metres. -->
+  <xacro:property name="foot_x" value="0.20"/>
+  <xacro:property name="foot_y" value="0.12"/>
+  <xacro:property name="foot_z" value="0.045"/>
+
+  <!-- Masses in kilograms; these are model assumptions. -->
+  <xacro:property name="m_base"  value="7.5"/>
+  <xacro:property name="m_thigh" value="1.4"/>
+  <xacro:property name="m_shin"  value="1.0"/>
+  <xacro:property name="m_foot"  value="0.9"/>
+
+  <!-- contact params -->
+  <xacro:property name="mu" value="1.4"/>
+  <xacro:property name="kp" value="400000"/>
+  <xacro:property name="kd" value="400"/>
+
+  <!-- joint dynamics -->
+  <xacro:property name="hip_damp"   value="2.5"/>
+  <xacro:property name="knee_damp"  value="3.0"/>
+  <xacro:property name="ankle_damp" value="2.5"/>
+  <xacro:property name="joint_fric" value="0.2"/>
+</robot>

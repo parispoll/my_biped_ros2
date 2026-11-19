@@ -1,0 +1,10 @@
+# Legacy read-only balance observer proposals; these settings do not command joints.
+
+balance_observer:
+  ros__parameters:
+    # Candidate TOTAL body gains, divided equally between the two ankles.
+    # Observation only: these parameters do not change motor commands.
+    kp: 20.0            # N m/rad
+    kd: 4.0             # N m s/rad
+    ankle_limit: 0.5    # N m per ankle, proposal clamp
+    target_pitch: 0.0   # rad, world upright

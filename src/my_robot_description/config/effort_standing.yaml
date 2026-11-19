@@ -1,0 +1,23 @@
+# Historical six-joint effort-control configuration; retained for legacy GUI modes.
+
+controller_manager:
+  ros__parameters:
+    update_rate: 250
+    enforce_command_limits: true
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    standing_effort_controller:
+      type: forward_command_controller/ForwardCommandController
+standing_effort_controller:
+  ros__parameters:
+    joints: [left_hip, left_knee, left_ankle, right_hip, right_knee, right_ankle]
+    interface_name: effort
+standing_effort:
+  ros__parameters:
+    # Angle correction [N m/rad], then velocity damping [N m s/rad].
+    kp: [80.0, 100.0, 60.0]
+    kd: [0.10, 0.15, 0.05]
+    # Used only by controller_mode:=pid; hip/knee/ankle order.
+    # Integral gain [N m/(rad s)] and maximum integral contribution [N m].
+    ki: [80.0, 100.0, 60.0]
+    integral_limits: [1.0, 1.0, 1.0]

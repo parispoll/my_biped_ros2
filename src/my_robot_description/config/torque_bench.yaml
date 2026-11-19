@@ -1,0 +1,15 @@
+# Isolated torque-bench controller configuration; not the walking controller.
+
+# Only the independent bench uses this file. Biped controller settings are unchanged.
+controller_manager:
+  ros__parameters:
+    update_rate: 250
+    enforce_command_limits: true
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    bench_effort_controller:
+      type: forward_command_controller/ForwardCommandController
+bench_effort_controller:
+  ros__parameters:
+    joints: [bench_joint]
+    interface_name: effort

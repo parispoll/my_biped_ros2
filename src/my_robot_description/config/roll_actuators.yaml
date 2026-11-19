@@ -1,0 +1,28 @@
+# Named actuator profiles: caps in N m, speed limits in rad/s, masses in kg.
+# Select the profile before importing model/control modules.
+
+# Output-shaft limits. Legacy is retained as the reproducible earlier baseline.
+# P54 assignment is our design choice, not THORMANG3's joint-by-joint layout.
+# Manufacturer continuous operating points at 24 V; no stall/peak boost used.
+profiles:
+  legacy:
+    caps_nm: [6.0, 6.0, 10.0, 6.0, 6.0]
+    speed_rad_s: [2.0, 3.0, 3.0, 3.0, 2.0]
+    added_mass_kg: [0.0, 0.0, 0.0, 0.0, 0.0]
+    case_length_m: [0.0, 0.0, 0.0, 0.0, 0.0]
+  robotis_p54:
+    # Per leg: hip roll, hip pitch, knee pitch, ankle pitch, ankle roll.
+    models: [PH54-200-S500-R, PH54-100-S500-R, PH54-200-S500-R, PH54-100-S500-R, PH54-100-S500-R]
+    caps_nm: [44.7, 25.3, 44.7, 25.3, 25.3]
+    # Conservative 2.4 rad/s operating guard (< published continuous 29/29.2 rpm).
+    speed_rad_s: [2.4, 2.4, 2.4, 2.4, 2.4]
+    added_mass_kg: [0.855, 0.740, 0.855, 0.740, 0.740]
+    # Uniform-box inertia approximation: cases 54 x length x 54 mm.
+    case_length_m: [0.126, 0.108, 0.126, 0.108, 0.108]
+    voltage_v: 24.0
+    published_continuous_rpm: [29.0, 29.2, 29.0, 29.2, 29.2]
+    published_no_load_rpm: [33.1, 33.3, 33.1, 33.3, 33.3]
+    sources:
+      - https://emanual.robotis.com/docs/en/dxl/p/ph54-200-s500-r/
+      - https://emanual.robotis.com/docs/en/dxl/p/ph54-100-s500-r/
+      - https://emanual.robotis.com/docs/en/platform/thormang3/introduction/

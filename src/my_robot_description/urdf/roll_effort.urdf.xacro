@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!-- Separate ten-joint effort-standing entry point. -->
+<robot name="biped_roll" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="controllers_yaml" default="$(find my_robot_description)/config/roll_standing.yaml"/>
+  <xacro:arg name="initial_hip" default="0.0"/>
+  <xacro:arg name="initial_knee" default="0.0"/>
+  <xacro:arg name="initial_ankle" default="0.0"/>
+  <xacro:macro name="roll_effort_joint" params="name initial limit">
+    <joint name="${name}">
+      <command_interface name="effort"><param name="min">${-limit}</param><param name="max">${limit}</param></command_interface>
+      <state_interface name="position"><param name="initial_value">${initial}</param></state_interface>
+      <state_interface name="velocity"/><state_interface name="effort"/>
+    </joint>
+  </xacro:macro>
+  <xacro:include filename="components/properties.xacro"/>
+  <xacro:include filename="components/materials.xacro"/>
+  <xacro:include filename="components/base.xacro"/>
+  <xacro:include filename="components/leg_roll.xacro"/>
+  <xacro:leg5 side="left" ysign="1"/>
+  <xacro:leg5 side="right" ysign="-1"/>
+  <ros2_control name="biped_roll" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <xacro:roll_effort_joint name="left_hip_roll" initial="0.0" limit="${roll_actuator['caps_nm'][0]}"/>
+    <xacro:roll_effort_joint name="left_hip_pitch" initial="$(arg initial_hip)" limit="${roll_actuator['caps_nm'][1]}"/>
+    <xacro:roll_effort_joint name="left_knee_pitch" initial="$(arg initial_knee)" limit="${roll_actuator['caps_nm'][2]}"/>
+    <xacro:roll_effort_joint name="left_ankle_pitch" initial="$(arg initial_ankle)" limit="${roll_actuator['caps_nm'][3]}"/>
+    <xacro:roll_effort_joint name="left_ankle_roll" initial="0.0" limit="${roll_actuator['caps_nm'][4]}"/>
+    <xacro:roll_effort_joint name="right_hip_roll" initial="0.0" limit="${roll_actuator['caps_nm'][0]}"/>
+    <xacro:roll_effort_joint name="right_hip_pitch" initial="$(arg initial_hip)" limit="${roll_actuator['caps_nm'][1]}"/>
+    <xacro:roll_effort_joint name="right_knee_pitch" initial="$(arg initial_knee)" limit="${roll_actuator['caps_nm'][2]}"/>
+    <xacro:roll_effort_joint name="right_ankle_pitch" initial="$(arg initial_ankle)" limit="${roll_actuator['caps_nm'][3]}"/>
+    <xacro:roll_effort_joint name="right_ankle_roll" initial="0.0" limit="${roll_actuator['caps_nm'][4]}"/>
+  </ros2_control>
+  <xacro:include filename="components/gazebo.xacro"/>
+  <xacro:include filename="components/imu.xacro"/>
+  <xacro:include filename="components/foot_contacts.xacro"/>
+</robot>

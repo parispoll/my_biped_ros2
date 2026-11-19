@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="leg3" params="side ysign">
+
+    <!-- THIGH -->
+    <link name="${side}_thigh">
+      <inertial>
+        <origin xyz="0 0 ${-thigh_len/2}" rpy="0 0 0"/>
+        <mass value="${m_thigh}"/>
+        <!-- approximate as cylinder along Z -->
+        <inertia
+          ixx="${(m_thigh*(3*leg_rad*leg_rad + thigh_len*thigh_len))/12}"
+          iyy="${(m_thigh*(3*leg_rad*leg_rad + thigh_len*thigh_len))/12}"
+          izz="${0.5*m_thigh*leg_rad*leg_rad}"
+          ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 ${-thigh_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad}" length="${thigh_len}"/></geometry>
+        <material name="green"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 ${-thigh_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad}" length="${thigh_len}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${side}_hip" type="revolute">
+      <parent link="base_link"/>
+      <child link="${side}_thigh"/>
+      <!-- Hip attachment offset in the base frame. -->
+      <origin xyz="0 ${ysign*hip_y} 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-1.2" upper="1.2" effort="80" velocity="6"/>
+      <dynamics damping="${hip_damp}" friction="${joint_fric}"/>
+    </joint>
+
+    <!-- SHIN -->
+    <link name="${side}_shin">
+      <inertial>
+        <origin xyz="0 0 ${-shin_len/2}" rpy="0 0 0"/>
+        <mass value="${m_shin}"/>
+        <inertia
+          ixx="${(m_shin*(3*leg_rad*leg_rad + shin_len*shin_len))/12}"
+          iyy="${(m_shin*(3*leg_rad*leg_rad + shin_len*shin_len))/12}"
+          izz="${0.5*m_shin*leg_rad*leg_rad}"
+          ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 ${-shin_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad*0.95}" length="${shin_len}"/></geometry>
+        <material name="blue"/>
+      </visual>
+
+      <collision>
+        <origin xyz="0 0 ${-shin_len/2}" rpy="0 0 0"/>
+        <geometry><cylinder radius="${leg_rad*0.95}" length="${shin_len}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${side}_knee" type="revolute">
+      <parent link="${side}_thigh"/>
+      <child link="${side}_shin"/>
+      <origin xyz="0 0 ${-thigh_len}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="0.0" upper="2.4" effort="80" velocity="6"/>
+      <dynamics damping="${knee_damp}" friction="${joint_fric}"/>
+    </joint>
+
+    <!-- FOOT -->
+    <link name="${side}_foot">
+      <inertial>
+        <origin xyz="0 0 ${-foot_z/2}" rpy="0 0 0"/>
+        <mass value="${m_foot}"/>
+        <inertia
+          ixx="${m_foot*(foot_y*foot_y + foot_z*foot_z)/12}"
+          iyy="${m_foot*(foot_x*foot_x + foot_z*foot_z)/12}"
+          izz="${m_foot*(foot_x*foot_x + foot_y*foot_y)/12}"
+          ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+
+      <visual>
+        <origin xyz="0 0 ${-foot_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${foot_x} ${foot_y} ${foot_z}"/></geometry>
+        <material name="gray"/>
+      </visual>
+
+      <!-- The URDF converter appends _collision, yielding e.g. left_foot_collision. -->
+      <collision name="${side}_foot">
+        <origin xyz="0 0 ${-foot_z/2}" rpy="0 0 0"/>
+        <geometry><box size="${foot_x} ${foot_y} ${foot_z}"/></geometry>
+      </collision>
+    </link>
+
+    <joint name="${side}_ankle" type="revolute">
+      <parent link="${side}_shin"/>
+      <child link="${side}_foot"/>
+      <!-- ankle directly under shin -->
+      <origin xyz="0 0 ${-shin_len}" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="-0.8" upper="0.8" effort="60" velocity="4"/>
+      <dynamics damping="${ankle_damp}" friction="${joint_fric}"/>
+    </joint>
+
+    <!-- Gazebo appearance -->
+    <gazebo reference="${side}_thigh"><material>Gazebo/Green</material></gazebo>
+    <gazebo reference="${side}_shin"><material>Gazebo/Blue</material></gazebo>
+    <gazebo reference="${side}_foot"><material>Gazebo/Grey</material></gazebo>
+
+    <!-- Legacy contact settings: backend support must be verified separately. -->
+    <gazebo reference="${side}_foot">
+      <mu1>${mu}</mu1>
+      <mu2>${mu}</mu2>
+      <kp>${kp}</kp>
+      <kd>${kd}</kd>
+      <minDepth>0.001</minDepth>
+      <maxVel>0.05</maxVel>
+      <selfCollide>false</selfCollide>
+    </gazebo>
+
+  </xacro:macro>
+</robot>

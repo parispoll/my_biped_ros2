@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<!-- Independent pendulum bench: this does not change my_biped. -->
+<robot name="torque_bench" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="controllers_yaml" default="$(find my_robot_description)/config/torque_bench.yaml"/>
+  <xacro:include filename="components/properties.xacro"/>
+  <xacro:property name="radius" value="${leg_rad*0.95}"/>
+  <xacro:property name="length" value="${shin_len}"/>
+  <xacro:property name="mass" value="${m_shin}"/>
+  <link name="world"/>
+  <link name="bench_base">
+    <inertial>
+      <mass value="1"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual><geometry><box size="0.10 0.12 0.08"/></geometry>
+      <material name="bench_red"><color rgba="0.8 0.2 0.1 1"/></material>
+    </visual>
+  </link>
+  <joint name="bench_mount" type="fixed">
+    <parent link="world"/><child link="bench_base"/>
+    <origin xyz="0 0 0.8"/>
+  </joint>
+  <link name="bench_rod">
+    <inertial>
+      <origin xyz="0 0 ${-length/2}"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass*(3*radius*radius+length*length)/12}"
+               iyy="${mass*(3*radius*radius+length*length)/12}"
+               izz="${mass*radius*radius/2}" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual><origin xyz="0 0 ${-length/2}"/>
+      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+      <material name="bench_blue"><color rgba="0.1 0.3 0.85 1"/></material>
+    </visual>
+    <collision><origin xyz="0 0 ${-length/2}"/>
+      <geometry><cylinder radius="${radius}" length="${length}"/></geometry>
+    </collision>
+  </link>
+  <joint name="bench_joint" type="revolute">
+    <parent link="bench_base"/><child link="bench_rod"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-0.8" upper="0.8" effort="2.0" velocity="6.0"/>
+    <!-- Bench damping is deliberately modest; this is not the biped knee model. -->
+    <dynamics damping="0.05" friction="0"/>
+  </joint>
+  <ros2_control name="torque_bench_hardware" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <joint name="bench_joint">
+      <command_interface name="effort">
+        <param name="min">-2.0</param><param name="max">2.0</param>
+      </command_interface>
+      <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
+  <gazebo>
+    <plugin name="gz_ros2_control::GazeboSimROS2ControlPlugin" filename="libgz_ros2_control-system.so">
+      <parameters>$(arg controllers_yaml)</parameters>
+      <hold_joints>false</hold_joints>
+    </plugin>
+  </gazebo>
+</robot>

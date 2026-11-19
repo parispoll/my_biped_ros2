@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Emit the original physical coefficients before disabling backend damping. -->
+  <gazebo>
+    <plugin name="biped::ViscousDamping" filename="$(find my_robot_description)/../../lib/libbiped_viscous_damping.so">
+      <joint name="left_hip"><damping>${hip_damp}</damping></joint>
+      <joint name="left_knee"><damping>${knee_damp}</damping></joint>
+      <joint name="left_ankle"><damping>${ankle_damp}</damping></joint>
+      <joint name="right_hip"><damping>${hip_damp}</damping></joint>
+      <joint name="right_knee"><damping>${knee_damp}</damping></joint>
+      <joint name="right_ankle"><damping>${ankle_damp}</damping></joint>
+    </plugin>
+  </gazebo>
+  <xacro:property name="hip_damp" value="0.0"/>
+  <xacro:property name="knee_damp" value="0.0"/>
+  <xacro:property name="ankle_damp" value="0.0"/>
+</robot>

@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <link name="base_link">
+    <!-- Base centre of mass is 2 cm above its link frame. -->
+    <inertial>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <mass value="${m_base}"/>
+      <inertia
+        ixx="${m_base*(base_y*base_y + base_z*base_z)/12}"
+        iyy="${m_base*(base_x*base_x + base_z*base_z)/12}"
+        izz="${m_base*(base_x*base_x + base_y*base_y)/12}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${base_x} ${base_y} ${base_z}"/></geometry>
+      <material name="red"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry><box size="${base_x} ${base_y} ${base_z}"/></geometry>
+    </collision>
+  </link>
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Red</material>
+    <selfCollide>false</selfCollide>
+  </gazebo>
+</robot>
